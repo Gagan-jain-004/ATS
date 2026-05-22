@@ -1,0 +1,110 @@
+generator client {
+  provider = "prisma-client-js"
+  engineType = "binary"
+}
+
+datasource db {
+  provider = "postgresql"
+  // url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  ADMIN
+  RECRUITER
+}
+
+enum ApplicationStatus {
+  UNREAD
+  READ
+  SHORTLISTED
+  APPROVED
+  DECLINED
+}
+
+model User {
+  id        String         @id @default(cuid())
+  clerkId   String         @unique
+  email     String         @unique
+  name      String?
+  role      UserRole       @default(RECRUITER)
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+  jobs      Job[]          @relation("JobOwner")
+  notes     RecruiterNote[]
+}
+
+model Job {
+  id             String        @id @default(cuid())
+  title          String
+  city           String        @default("Remote")
+  description    String        @default("")
+  originalJd     String
+  enhancedJd     String
+  skills         String[]
+  jobEmbedding   Json?
+  resumeCount    Int           @default(0)
+  shortlistedCount Int         @default(0)
+  pendingCount   Int           @default(0)
+  matchScore     Int           @default(0)
+  status         String        @default("Active")
+  ownerId        String
+  owner          User          @relation("JobOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+  applications Application[]
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  @@index([ownerId, updatedAt])
+}
+
+model Candidate {
+  id             String         @id @default(cuid())
+  fullName       String
+  email          String?
+  phone          String?
+  resumeUrl      String
+  resumeHash     String         @unique
+  parsedText     String
+  skills         String[]
+  experienceYears Float?
+  education      String?
+  embedding      Json?
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+  applications   Application[]
+  notes          RecruiterNote[]
+
+  @@index([email])
+  @@index([phone])
+}
+
+model Application {
+  id              String            @id @default(cuid())
+  candidateId     String
+  jobId           String
+  matchPercentage Int
+  matchedSkills   String[]
+  missingSkills   String[]
+  predictedRole   String?
+  status          ApplicationStatus @default(UNREAD)
+  notes           String?
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  candidate       Candidate         @relation(fields: [candidateId], references: [id], onDelete: Cascade)
+  job             Job               @relation(fields: [jobId], references: [id], onDelete: Cascade)
+
+  @@unique([candidateId, jobId])
+  @@index([jobId, status, matchPercentage])
+}
+
+model RecruiterNote {
+  id          String    @id @default(cuid())
+  candidateId String
+  userId      String
+  note        String
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  candidate   Candidate @relation(fields: [candidateId], references: [id], onDelete: Cascade)
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([candidateId, createdAt])
+}
