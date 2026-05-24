@@ -103,7 +103,7 @@ function mapApplicationToCandidateSummary(application: Prisma.ApplicationGetPayl
   };
 }
 
-export async function getJobs() {
+export async function getJobs(): Promise<JobSummary[]> {
   const clerkId = await getAuthenticatedClerkId();
   if (!clerkId) {
     return [];
@@ -145,7 +145,7 @@ export async function getJobById(jobId: string) {
   return mapJobToSummary(job);
 }
 
-export async function getCandidates(jobId: string) {
+export async function getCandidates(jobId: string): Promise<CandidateSummary[]> {
   const clerkId = await getAuthenticatedClerkId();
   if (!clerkId) {
     return [];

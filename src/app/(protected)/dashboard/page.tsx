@@ -4,12 +4,13 @@ import { DebouncedSearchInput } from "@/components/ats/debounced-search";
 // StatCards removed per simplified dashboard
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { getJobs } from "@/lib/mock-store";
+import { type JobSummary } from "@/lib/types";
 // dashboardMetrics removed
 
 export default async function DashboardPage({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
   const resolvedSearchParams = await searchParams;
   const query = String(resolvedSearchParams.q ?? "").toLowerCase();
-  const jobs = (await getJobs()).filter((job) => {
+  const jobs = (await getJobs()).filter((job: JobSummary) => {
     if (!query) return true;
     return [job.title, job.city, job.description, job.enhancedJd].some((value) => value.toLowerCase().includes(query));
   });
