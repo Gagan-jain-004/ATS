@@ -39,7 +39,7 @@ export default function MatchExplainDialog() {
             <ul className="mt-2 list-disc pl-5">
               <li>Semantic similarity (embedding cosine similarity) between the job and resume text — captures phrasing and related concepts.</li>
               <li>Skill overlap — fraction of job skills present in the resume (exact and normalized matches).</li>
-              <li>Experience alignment — whether the candidate's years align with the job band (penalizes under-experience).</li>
+              <li>Experience alignment — whether the candidate&apos;s years align with the job band (penalizes under-experience).</li>
               <li>Composite score = 50% semantic + 35% skills + 15% experience, then clamped to 0–100.</li>
             </ul>
           </section>
@@ -58,7 +58,7 @@ export default function MatchExplainDialog() {
             <ul className="mt-2 list-disc pl-5">
               <li>Update the job skills and description to be explicit about required technologies and seniority.</li>
               <li>Add a location and experience band to the job to improve filtering.</li>
-              <li>Use the "Edit Job" flow to refresh candidate scoring after edits — scores are recomputed automatically.</li>
+              <li>Use the &quot;Edit Job&quot; flow to refresh candidate scoring after edits — scores are recomputed automatically.</li>
             </ul>
           </section>
 

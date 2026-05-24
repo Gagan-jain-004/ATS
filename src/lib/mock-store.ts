@@ -1,11 +1,31 @@
 import dayjs from "dayjs";
 import { auth, currentUser } from "@clerk/nextjs/server";
-import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { hashContent } from "@/lib/hash";
 import { generateEmbedding } from "@/lib/ai/embedding";
 import { scoreResumeMatch } from "@/lib/ai/matching";
 import { type CandidateSummary, type JobSummary } from "@/lib/types";
+
+type ApplicationWithCandidate = {
+  candidate: {
+    id: string;
+    fullName: string;
+    email: string | null;
+    phone: string | null;
+    education: string | null;
+    skills: string[];
+    experienceYears: number | null;
+    resumeUrl: string;
+    parsedText: string;
+  };
+  status: CandidateSummary["status"];
+  matchPercentage: number;
+  matchedSkills: string[];
+  missingSkills: string[];
+  predictedRole: string | null;
+  notes: string | null;
+  createdAt: Date;
+};
 
 function getRelativeUpdatedAt(updatedAt: Date) {
   const diffInMinutes = dayjs().diff(updatedAt, "minute");
@@ -51,7 +71,7 @@ function mapJobToSummary(job: {
   originalJd: string;
   enhancedJd: string;
   skills: string[];
-  jobEmbedding: Prisma.JsonValue | null;
+  jobEmbedding: unknown;
   resumeCount: number;
   shortlistedCount: number;
   pendingCount: number;
@@ -83,7 +103,7 @@ function mapJobToSummary(job: {
   };
 }
 
-function mapApplicationToCandidateSummary(application: Prisma.ApplicationGetPayload<{ include: { candidate: true } }>): CandidateSummary {
+function mapApplicationToCandidateSummary(application: ApplicationWithCandidate): CandidateSummary {
   return {
     id: application.candidate.id,
     fullName: application.candidate.fullName,
@@ -241,7 +261,7 @@ export async function addJob(job: JobSummary) {
       originalJd: job.originalJd,
       enhancedJd: job.enhancedJd,
       skills: job.skills,
-      jobEmbedding: job.jobEmbedding as Prisma.InputJsonValue | undefined,
+      jobEmbedding: job.jobEmbedding,
       resumeCount: job.resumeCount,
       shortlistedCount: job.shortlistedCount,
       pendingCount: job.pendingCount,
@@ -276,7 +296,7 @@ export async function updateJob(jobId: string, patch: Partial<JobSummary>) {
       originalJd: patch.originalJd,
       enhancedJd,
       skills: patch.skills,
-      jobEmbedding: patch.jobEmbedding as Prisma.InputJsonValue | undefined,
+      jobEmbedding: patch.jobEmbedding,
       resumeCount: patch.resumeCount,
       shortlistedCount: patch.shortlistedCount,
       pendingCount: patch.pendingCount,
@@ -400,15 +420,26 @@ export async function findDuplicateCandidate(jobId: string, candidate: Pick<Cand
     return undefined;
   }
 
+  const duplicateFilters: Array<{ candidate: { email?: string; phone?: string; resumeHash?: string } }> = [];
+  if (candidate.email) {
+    duplicateFilters.push({ candidate: { email: candidate.email } });
+  }
+  if (candidate.phone) {
+    duplicateFilters.push({ candidate: { phone: candidate.phone } });
+  }
+  if (candidate.resumeHash) {
+    duplicateFilters.push({ candidate: { resumeHash: candidate.resumeHash } });
+  }
+
+  if (!duplicateFilters.length) {
+    return undefined;
+  }
+
   const duplicate = await prisma.application.findFirst({
     where: {
       jobId,
       job: { owner: { clerkId } },
-      OR: [
-        candidate.email ? { candidate: { email: candidate.email } } : undefined,
-        candidate.phone ? { candidate: { phone: candidate.phone } } : undefined,
-        candidate.resumeHash ? { candidate: { resumeHash: candidate.resumeHash } } : undefined
-      ].filter(Boolean) as Prisma.ApplicationWhereInput[]
+      OR: duplicateFilters
     },
     include: {
       candidate: true
