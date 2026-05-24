@@ -8,6 +8,7 @@ import { ResumeDropzone } from "@/components/ats/resume-dropzone";
 import { CandidateTable } from "@/components/ats/candidate-table";
 import { SearchFilters } from "@/components/ats/search-filters";
 import { getCandidates, getJobById } from "@/lib/mock-store";
+import { type CandidateSummary } from "@/lib/types";
 import Link from "next/link";
 
 function parseExperienceBand(value: string | undefined) {
@@ -17,7 +18,7 @@ function parseExperienceBand(value: string | undefined) {
   return [min || 0, max || Infinity] as const;
 }
 
-function filterCandidates(candidates: Awaited<ReturnType<typeof getCandidates>>, searchParams: Record<string, string | string[] | undefined>) {
+function filterCandidates(candidates: CandidateSummary[], searchParams: Record<string, string | string[] | undefined>) {
   const name = String(searchParams.name ?? "").toLowerCase();
   const phone = String(searchParams.phone ?? "").toLowerCase();
   const skill = String(searchParams.skill ?? "").toLowerCase();
@@ -28,7 +29,7 @@ function filterCandidates(candidates: Awaited<ReturnType<typeof getCandidates>>,
   return candidates.filter((candidate) => {
     const matchesName = !name || candidate.fullName.toLowerCase().includes(name);
     const matchesPhone = !phone || candidate.phone.toLowerCase().includes(phone);
-    const matchesSkill = !skill || candidate.skills.some((entry: string) => entry.toLowerCase().includes(skill));
+    const matchesSkill = !skill || candidate.skills.some((entry) => entry.toLowerCase().includes(skill));
     const matchesStatus = status === "all" || candidate.status === status;
     const matchesExperience = candidate.experienceYears >= minExperience && candidate.experienceYears <= maxExperience;
     return matchesName && matchesPhone && matchesSkill && matchesStatus && matchesExperience;
