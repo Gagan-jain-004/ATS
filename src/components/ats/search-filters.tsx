@@ -1,14 +1,41 @@
-import { Button } from "@/components/ui/button";
+"use client";
+
+import { useCallback, useRef } from "react";
+import { useRouter, usePathname } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export function SearchFilters({ searchParams }: { searchParams: Record<string, string | string[] | undefined> }) {
+  const router = useRouter();
+  const formRef = useRef<HTMLFormElement | null>(null);
+
+  const pathname = usePathname();
+
+  const applyFilters = useCallback(() => {
+    const form = formRef.current;
+    if (!form) return;
+    const fd = new FormData(form);
+    const params = new URLSearchParams();
+    for (const [key, value] of fd.entries()) {
+      const v = String(value);
+      if (v !== "" && v !== "all") {
+        params.set(key, v);
+      }
+    }
+    const query = params.toString();
+    // Keep the current pathname (so we remain on the job dashboard), only change the query string
+    router.replace(query ? `${pathname}?${query}` : `${pathname}`, { scroll: false });
+  }, [router, pathname]);
+
   return (
-    <form className="grid gap-3 rounded-3xl border border-border bg-white p-4 lg:grid-cols-5" method="get">
+    <form
+      ref={formRef}
+      className="grid gap-3 rounded-3xl border border-border bg-white p-4 lg:grid-cols-3"
+      onSubmit={(e) => e.preventDefault()}
+      onChange={() => void applyFilters()}
+    >
       <Input name="name" defaultValue={String(searchParams.name ?? "")} placeholder="Search by name" />
-      <Input name="phone" defaultValue={String(searchParams.phone ?? "")} placeholder="Search by phone" />
-      <Input name="skill" defaultValue={String(searchParams.skill ?? "")} placeholder="Search by skill" />
-      <Select name="status" defaultValue={String(searchParams.status ?? "all")}>
+      <Select name="status" defaultValue={String(searchParams.status ?? "all")} onValueChange={() => void applyFilters()}>
         <SelectTrigger>
           <SelectValue placeholder="Status" />
         </SelectTrigger>
@@ -21,7 +48,7 @@ export function SearchFilters({ searchParams }: { searchParams: Record<string, s
           <SelectItem value="DECLINED">Declined</SelectItem>
         </SelectContent>
       </Select>
-      <Select name="experience" defaultValue={String(searchParams.experience ?? "all")}>
+      <Select name="experience" defaultValue={String(searchParams.experience ?? "all")} onValueChange={() => void applyFilters()}>
         <SelectTrigger>
           <SelectValue placeholder="Experience" />
         </SelectTrigger>
@@ -33,7 +60,6 @@ export function SearchFilters({ searchParams }: { searchParams: Record<string, s
           <SelectItem value="8+">8+ Years</SelectItem>
         </SelectContent>
       </Select>
-      <Button type="submit" variant="outline" className="lg:col-span-5">Apply Filters</Button>
     </form>
   );
 }

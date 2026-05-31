@@ -19,7 +19,7 @@ export function CandidateTable({ candidates, jobId }: { candidates: CandidateSum
         <CardContent className="p-0">
           <div className="overflow-hidden rounded-2xl">
             <table className="w-full text-left text-sm">
-              <thead className="bg-slate-50 text-xs uppercase tracking-[0.18em] text-slate-500">
+              <thead className="bg-slate-50 text-xs uppercase tracking-[0.18em] text-slate-500 sticky top-0 z-10">
                 <tr>
                   <th className="px-5 py-4">Candidate Name</th>
                   <th className="px-5 py-4">Match Score</th>
@@ -30,8 +30,8 @@ export function CandidateTable({ candidates, jobId }: { candidates: CandidateSum
                 </tr>
               </thead>
               <tbody>
-                {candidates.map((candidate) => (
-                  <tr key={candidate.id} className="border-t border-border/70">
+                {candidates.map((candidate, idx) => (
+                  <tr key={candidate.id} className={`border-t border-border/70 ${idx % 2 === 0 ? "bg-white" : "bg-slate-50"} hover:bg-slate-100 transition-colors`}> 
                     <td className="px-5 py-4">
                       <p className="font-semibold text-slate-950">{candidate.fullName}</p>
                       <p className="text-xs text-slate-500">{candidate.email}</p>
@@ -45,13 +45,13 @@ export function CandidateTable({ candidates, jobId }: { candidates: CandidateSum
                     <td className="px-5 py-4">
                       <div className="flex flex-wrap gap-2">
                         {candidate.skills.slice(0, 3).map((skill) => (
-                          <Badge key={skill} variant="secondary" className="bg-slate-100 text-slate-700">{skill}</Badge>
+                          <Badge key={skill} variant="secondary" className="bg-blue-50 text-blue-700">{skill}</Badge>
                         ))}
                       </div>
                     </td>
                     <td className="px-5 py-4 text-slate-600">{candidate.experienceYears} Years</td>
                     <td className="px-5 py-4">
-                      <Badge variant="outline">{candidate.status}</Badge>
+                      <Badge variant="outline" className="px-2 py-1">{candidate.status}</Badge>
                     </td>
                     <td className="px-5 py-4">
                       <div className="flex justify-end gap-2">
@@ -59,11 +59,11 @@ export function CandidateTable({ candidates, jobId }: { candidates: CandidateSum
                           setSelectedCandidate(candidate);
                           setOpen(true);
                         }} type="button" aria-label={`View ${candidate.fullName}`} title="View candidate details">
-                          <Eye className="h-4 w-4" />
+                          <Eye className="h-4 w-4 text-blue-600" />
                         </Button>
                         <Button variant="ghost" size="icon" asChild>
                           <a href={`mailto:${candidate.email}`} aria-label={`Email ${candidate.fullName}`}>
-                            <Mail className="h-4 w-4" />
+                            <Mail className="h-4 w-4 text-slate-600" />
                           </a>
                         </Button>
                       </div>

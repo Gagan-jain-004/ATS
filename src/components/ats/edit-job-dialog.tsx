@@ -73,7 +73,7 @@ export function EditJobDialog({ job }: { job: JobSummary }) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" className="w-full rounded-xl">
+        <Button className="w-full rounded-xl bg-blue-600 text-white hover:bg-blue-700">
           <PencilLine className="h-4 w-4" /> Edit JD
         </Button>
       </DialogTrigger>
@@ -93,6 +93,7 @@ export function EditJobDialog({ job }: { job: JobSummary }) {
               <label className="text-sm font-medium text-slate-700">City / Location</label>
               <Input value={city} onChange={(event) => setCity(event.target.value)} placeholder="Remote / London / New York" />
             </div>
+            {/* Status is read-only in this dialog; it reflects system state */}
             <div className="space-y-2">
               <label className="text-sm font-medium text-slate-700">Required Skills</label>
               <Input value={skills} onChange={(event) => setSkills(event.target.value)} placeholder="Java, Spring Boot, PostgreSQL, REST APIs" />
@@ -101,6 +102,7 @@ export function EditJobDialog({ job }: { job: JobSummary }) {
               <label className="text-sm font-medium text-slate-700">Experience Required (years)</label>
               <Input value={experienceYears} onChange={(event) => setExperienceYears(event.target.value)} placeholder="5" inputMode="numeric" />
             </div>
+            {/* Non-editable job metrics removed from this dialog */}
           </div>
 
           <div className="space-y-2">

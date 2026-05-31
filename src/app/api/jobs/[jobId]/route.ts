@@ -1,6 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { buildSearchableJobText, deleteJob, getCandidates, getJobById, refreshJobCandidateMatches, updateJob } from "@/lib/mock-store";
 import { generateEmbedding } from "@/lib/ai/embedding";
+import { type JobSummary } from "@/lib/types";
+
+function parseJobStatus(value: unknown): JobSummary["status"] {
+  return value === "Draft" ? "Draft" : "Active";
+}
 
 export async function GET(_: NextRequest, { params }: { params: Promise<{ jobId: string }> }) {
   const resolvedParams = await params;
@@ -20,6 +25,11 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     skills?: string[];
     experienceYears?: number;
     description?: string;
+    status?: string;
+    resumeCount?: number;
+    shortlistedCount?: number;
+    pendingCount?: number;
+    matchScore?: number;
   };
 
   const title = String(payload.title ?? "").trim();
@@ -27,6 +37,11 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
   const skills = Array.isArray(payload.skills) ? payload.skills.map((entry) => String(entry).trim()).filter(Boolean) : [];
   const description = String(payload.description ?? "").trim();
   const experienceYears = Number.isFinite(payload.experienceYears) ? Number(payload.experienceYears) : undefined;
+  const status = parseJobStatus(payload.status);
+  const resumeCount = Number.isFinite(payload.resumeCount) ? Number(payload.resumeCount) : undefined;
+  const shortlistedCount = Number.isFinite(payload.shortlistedCount) ? Number(payload.shortlistedCount) : undefined;
+  const pendingCount = Number.isFinite(payload.pendingCount) ? Number(payload.pendingCount) : undefined;
+  const matchScore = Number.isFinite(payload.matchScore) ? Number(payload.matchScore) : undefined;
 
   if (!title || !description) {
     return NextResponse.json({ error: "Job title and description are required." }, { status: 400 });
@@ -50,6 +65,12 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     skills,
     jobEmbedding: embedding,
     lastUpdated: "Just now"
+    ,
+    status,
+    resumeCount,
+    shortlistedCount,
+    pendingCount,
+    matchScore
   });
 
   if (!job) {

@@ -20,7 +20,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     <div className="min-h-screen text-foreground">
       <header className="sticky top-0 z-40 border-b border-border/80 bg-background/85 backdrop-blur-xl">
         <div className="mx-auto flex h-16 max-w-[1600px] items-center justify-between px-4 sm:px-6 lg:px-8">
-          <Link href="/dashboard" className="text-xl font-extrabold tracking-tight text-slate-950">
+          <Link href="/" className="text-xl font-extrabold tracking-tight text-slate-950">
             TalentStream AI
           </Link>
           <div className="hidden items-center gap-2 text-sm text-muted-foreground md:flex">

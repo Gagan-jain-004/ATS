@@ -2,10 +2,10 @@ import { notFound } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { DebouncedSearchInput } from "@/components/ats/debounced-search";
 import { EditJobDialog } from "@/components/ats/edit-job-dialog";
 import { ResumeDropzone } from "@/components/ats/resume-dropzone";
 import { CandidateTable } from "@/components/ats/candidate-table";
+import { ExportCandidatesButton } from "@/components/ats/export-candidates-button";
 import { SearchFilters } from "@/components/ats/search-filters";
 import { getCandidates, getJobById } from "@/lib/mock-store";
 import { type CandidateSummary } from "@/lib/types";
@@ -66,36 +66,86 @@ export default async function JobDashboardPage({ params, searchParams }: { param
   const paginatedCandidates = candidates.slice(start, start + pageSize);
   const totalPages = Math.max(Math.ceil(candidates.length / pageSize), 1);
 
+  const jobDetails = [
+    { label: "Role", value: job.title },
+    { label: "Location", value: job.city },
+    { label: "Status", value: job.status },
+    { label: "Created", value: job.createdAt },
+    { label: "Updated", value: job.lastUpdated },
+    { label: "Applicants", value: job.resumeCount.toString() },
+    { label: "Shortlisted", value: job.shortlistedCount.toString() },
+    { label: "Pending", value: job.pendingCount.toString() }
+  ];
+
   return (
     <div className="space-y-6 p-4 sm:p-6 lg:p-8">
-      <section className="grid gap-4 xl:grid-cols-[280px_minmax(0,1fr)]">
-        <Card className="border-border/80 bg-white/90">
+      <section className="grid gap-4 xl:grid-cols-2 xl:items-stretch">
+        <Card className="h-full border-border/80 bg-white/95 ring-1 ring-blue-50">
           <CardHeader className="pb-3">
             <Badge variant="secondary" className="w-fit">Active Role</Badge>
             <CardTitle className="text-2xl">Job Summary</CardTitle>
             <CardDescription>Current recruitment snapshot for the selected opening.</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4 text-sm text-slate-600">
-            <p>{job.description}</p>
-            <div className="space-y-2 rounded-2xl border border-border bg-slate-50 p-4">
-              <div className="flex items-center justify-between"><span>Applicants</span><span className="font-semibold text-slate-950">{job.resumeCount}</span></div>
-              <div className="flex items-center justify-between"><span>Shortlisted</span><span className="font-semibold text-slate-950">{job.shortlistedCount}</span></div>
+          <CardContent className="space-y-5 text-sm text-slate-600">
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {jobDetails.map((detail) => {
+                const accent =
+                  detail.label === "Applicants"
+                    ? "bg-blue-50 text-blue-700"
+                    : detail.label === "Shortlisted"
+                    ? "bg-amber-50 text-amber-800"
+                    : detail.label === "Pending"
+                    ? "bg-orange-50 text-orange-800"
+                    : "bg-slate-50 text-slate-900";
+                return (
+                  <div key={detail.label} className={`rounded-2xl border border-border p-4 ${accent}`}>
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-500">{detail.label}</p>
+                    <p className="mt-2 text-base font-semibold">{detail.value}</p>
+                  </div>
+                );
+              })}
             </div>
+
+            <div className="grid gap-4 lg:grid-cols-2">
+              <div className="rounded-2xl border border-border bg-slate-50 p-4">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-500">Description</p>
+                <p className="mt-2 text-sm leading-6 text-slate-700">{job.description || job.originalJd}</p>
+              </div>
+              <div className="rounded-2xl border border-border bg-slate-50 p-4">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-500">Skills</p>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {job.skills.length ? (
+                    job.skills.map((skill) => (
+                      <Badge key={skill} variant="secondary" className="bg-blue-50 text-blue-700">
+                        {skill}
+                      </Badge>
+                    ))
+                  ) : (
+                    <p className="text-sm text-slate-600">No skills listed for this role.</p>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Original and Enhanced JD removed per request */}
+
             <EditJobDialog job={job} />
           </CardContent>
         </Card>
 
-        <ResumeDropzone jobId={resolvedParams.jobId} />
+        <div className="h-full">
+          <ResumeDropzone jobId={resolvedParams.jobId} />
+        </div>
       </section>
 
       <Card className="border-border/80 bg-white/90">
-        <CardHeader className="flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+        <CardHeader className="flex-col gap-4 lg:flex-row lg:items-end lg:justify-between bg-gradient-to-r from-white to-blue-50/30 p-6 rounded-t-2xl">
           <div>
             <CardTitle className="text-2xl">All Applicants</CardTitle>
-            <CardDescription>Search by name, phone, skill, status, match, and experience.</CardDescription>
+            <CardDescription>Search by name, status, match, and experience.</CardDescription>
           </div>
-          <div className="w-full lg:max-w-md">
-            <DebouncedSearchInput paramName="name" placeholder="Search candidates..." defaultValue={String(resolvedSearchParams.name ?? "")} />
+          <div className="flex items-center gap-2">
+            <ExportCandidatesButton candidates={candidates} jobTitle={job.title} />
           </div>
         </CardHeader>
         <CardContent className="space-y-4">

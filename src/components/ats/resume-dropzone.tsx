@@ -100,7 +100,7 @@ export function ResumeDropzone({ jobId }: { jobId: string }) {
   }
 
   return (
-    <Card className="border-dashed border-slate-300 bg-gradient-to-b from-white to-slate-50">
+    <Card className="h-full border-dashed border-slate-300 bg-gradient-to-b from-white to-slate-50">
       <CardContent className="flex min-h-[360px] flex-col gap-5 p-8 text-center">
         <div className="flex flex-1 flex-col items-center justify-center gap-5">
           <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-slate-950 text-white shadow-glow">
@@ -112,7 +112,7 @@ export function ResumeDropzone({ jobId }: { jobId: string }) {
               Upload PDF, DOC, or DOCX files in bulk. The system uploads to Cloudinary, extracts text locally, generates embeddings, and scores each candidate against the selected JD.
             </p>
           </div>
-          <Button type="button" className="rounded-xl" onClick={() => inputRef.current?.click()}>
+          <Button type="button" className="rounded-xl bg-blue-600 text-white hover:bg-blue-700" onClick={() => inputRef.current?.click()}>
             <UploadCloud className="h-4 w-4" /> Browse Files
           </Button>
         <input
