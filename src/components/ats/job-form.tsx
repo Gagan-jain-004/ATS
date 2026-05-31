@@ -56,7 +56,7 @@ export function JobForm() {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button className="rounded-xl shadow-glow">
+        <Button className="w-full rounded-xl shadow-glow sm:w-auto">
           <Sparkles className="h-4 w-4" /> Add Job
         </Button>
       </DialogTrigger>

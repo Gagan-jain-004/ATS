@@ -16,22 +16,22 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
   });
 
   return (
-    <div className="space-y-6 p-4 sm:p-6 lg:p-8">
-      <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-start">
-        <div className="w-full md:max-w-md">
+    <div className="space-y-6 p-3 sm:p-6 lg:p-8">
+      <div className="grid gap-3 sm:items-end md:grid-cols-[minmax(0,1fr)_auto] md:justify-start">
+        <div className="w-full">
           <DebouncedSearchInput paramName="q" placeholder="Search jobs..." defaultValue={query} />
         </div>
         <JobForm />
       </div>
 
-      <Card className="border-border/80 bg-white/80">
-        <CardHeader>
+      <Card className="border-border/80 bg-white/80 shadow-sm">
+        <CardHeader className="space-y-1 pb-4 sm:pb-6">
           <div>
-            <CardTitle className="text-xl">Recruiter Job Board</CardTitle>
-            <CardDescription>Open dashboards, shortlist candidates, and monitor each role’s status.</CardDescription>
+            <CardTitle className="text-lg sm:text-xl">Recruiter Job Board</CardTitle>
+            <CardDescription className="text-sm sm:text-base">Open dashboards, shortlist candidates, and monitor each role’s status.</CardDescription>
           </div>
         </CardHeader>
-        <CardContent>
+        <CardContent className="px-3 pb-3 pt-0 sm:px-6 sm:pb-6">
           <JobGrid jobs={jobs} />
         </CardContent>
       </Card>

@@ -39,14 +39,14 @@ export default function HomePage() {
   return (
     <main className="relative min-h-screen overflow-hidden">
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(37,99,235,0.16),transparent_28%),radial-gradient(circle_at_top_right,rgba(15,23,42,0.08),transparent_24%)]" />
-      <div className="relative mx-auto flex min-h-screen max-w-7xl flex-col px-4 py-6 sm:px-6 lg:px-8">
-        <header className="flex items-center justify-between rounded-3xl border border-border bg-white/80 px-5 py-4 shadow-sm backdrop-blur">
-          <div>
-            <p className="text-2xl font-extrabold tracking-tight text-slate-950">TalentStream AI</p>
+      <div className="relative mx-auto flex min-h-screen max-w-7xl flex-col px-3 py-4 sm:px-6 lg:px-8">
+        <header className="flex flex-col gap-4 rounded-3xl border border-border bg-white/80 px-4 py-4 text-center shadow-sm backdrop-blur sm:flex-row sm:items-center sm:justify-between sm:px-5 sm:text-left">
+          <div className="space-y-1">
+            <p className="text-xl font-extrabold tracking-tight text-slate-950 sm:text-2xl">TalentStream AI</p>
             <p className="text-sm text-slate-500">Internal recruiter ATS</p>
           </div>
-          <div className="flex items-center gap-2">
-            <Button asChild className="rounded-xl shadow-glow">
+          <div className="flex w-full flex-col items-center gap-2 sm:w-auto sm:flex-row sm:items-center sm:justify-end">
+            <Button asChild className="w-full rounded-xl shadow-glow sm:w-auto">
               <Link href="/dashboard">
                 Open Dashboard
                 <ArrowRight className="h-4 w-4" />
@@ -56,24 +56,24 @@ export default function HomePage() {
           </div>
         </header>
 
-        <section className="grid flex-1 items-start gap-10 py-8 lg:grid-cols-[1.1fr_0.9fr] lg:items-start lg:py-10">
-          <div className="space-y-8 pt-2 animate-fadeUp lg:pt-4">
+        <section className="grid flex-1 items-start gap-6 py-6 sm:gap-8 sm:py-8 lg:grid-cols-[1.1fr_0.9fr] lg:items-start lg:py-10">
+          <div className="mx-auto flex w-full max-w-2xl flex-col items-center space-y-8 pt-2 text-center animate-fadeUp lg:mx-0 lg:max-w-none lg:items-start lg:pt-4 lg:text-left">
             <div className="space-y-4">
               <Badge variant="secondary" className="w-fit rounded-full px-3 py-1 text-xs uppercase tracking-[0.24em]">
                 Recruiter workflow only
               </Badge>
               <div className="space-y-4">
-                <h1 className="max-w-3xl text-5xl font-black tracking-tight text-slate-950 sm:text-6xl lg:text-7xl">
+                <h1 className="max-w-3xl text-[2.35rem] font-black tracking-tight text-slate-950 sm:text-5xl lg:text-7xl">
                   A faster internal ATS for teams that review resumes every day.
                 </h1>
-                <p className="max-w-2xl text-lg leading-8 text-slate-600">
+                <p className="mx-auto max-w-2xl text-base leading-7 text-slate-600 sm:text-lg sm:leading-8 lg:mx-0">
                   TalentStream AI helps recruiters create jobs, enhance vague JDs, upload resumes, remove duplicates, and surface the strongest candidates with semantic matching.
                 </p>
               </div>
             </div>
 
-            <div className="flex flex-wrap gap-3">
-              <Button asChild size="lg" className="rounded-xl shadow-glow">
+            <div className="flex w-full flex-col gap-3 sm:max-w-xl sm:flex-row sm:flex-wrap sm:justify-center lg:justify-start">
+              <Button asChild size="lg" className="w-full rounded-xl shadow-glow sm:w-auto">
                 <Link href="/dashboard">
                   Go to recruiter dashboard
                   <ArrowRight className="h-4 w-4" />
@@ -82,7 +82,7 @@ export default function HomePage() {
               <HomeAuthActions variant="cta" />
             </div>
 
-            <div className="grid gap-3 sm:grid-cols-3">
+            <div className="grid w-full gap-3 sm:grid-cols-3">
               {[
                 ["Job creation", "Paste rough hiring text and save the job in seconds."],
                 ["Resume scoring", "Match % combines embeddings, skills, and experience."],
@@ -98,15 +98,15 @@ export default function HomePage() {
             </div>
           </div>
 
-          <div className="space-y-4">
+          <div className="mx-auto w-full max-w-xl space-y-4 lg:mx-0 lg:max-w-none">
             <Card className="overflow-hidden border-border/80 bg-slate-950 text-white shadow-2xl shadow-slate-900/20">
-              <CardContent className="p-6 sm:p-7">
-                <div className="flex items-center justify-between gap-4">
+              <CardContent className="p-5 sm:p-7">
+                <div className="flex flex-col gap-4 text-center sm:flex-row sm:items-center sm:justify-between sm:text-left">
                   <div>
                     <p className="text-sm uppercase tracking-[0.24em] text-slate-400">Today&apos;s pipeline</p>
-                    <h2 className="mt-2 text-3xl font-bold">Recruiter dashboard</h2>
+                    <h2 className="mt-2 text-2xl font-bold sm:text-3xl">Recruiter dashboard</h2>
                   </div>
-                  <div className="rounded-2xl bg-white/10 px-3 py-2 text-right">
+                  <div className="mx-auto w-fit rounded-2xl bg-white/10 px-3 py-2 text-center sm:mx-0 sm:text-right">
                     <p className="text-xs uppercase tracking-[0.2em] text-slate-300">Match score</p>
                     <p className="text-2xl font-black text-white">82%</p>
                   </div>
@@ -126,7 +126,7 @@ export default function HomePage() {
                 </div>
 
                 <div className="mt-6 rounded-3xl bg-white/5 p-4">
-                  <div className="flex items-center gap-3">
+                  <div className="flex flex-col items-center gap-3 text-center sm:flex-row sm:items-center sm:text-left">
                     <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-blue-500/20 text-blue-200">
                       <CheckCircle2 className="h-5 w-5" />
                     </div>
@@ -158,10 +158,10 @@ export default function HomePage() {
           </div>
         </section>
 
-        <section className="mb-2 grid gap-4 rounded-[2rem] border border-border bg-white/80 p-6 shadow-sm backdrop-blur lg:grid-cols-[0.8fr_1.2fr]">
+        <section className="mb-2 grid gap-4 rounded-[2rem] border border-border bg-white/80 p-4 shadow-sm backdrop-blur sm:p-6 lg:grid-cols-[0.8fr_1.2fr]">
           <div>
             <p className="text-sm font-semibold uppercase tracking-[0.22em] text-slate-500">How it works</p>
-            <h2 className="mt-2 text-2xl font-bold text-slate-950">Simple recruiter flow</h2>
+            <h2 className="mt-2 text-xl font-bold text-slate-950 sm:text-2xl">Simple recruiter flow</h2>
             <p className="mt-2 text-sm leading-6 text-slate-600">
               The interface stays focused on internal hiring tasks: no candidate portal, no interview module, and no extra AI features that add noise.
             </p>

@@ -18,13 +18,13 @@ export function HomeAuthActions({ variant = "header" }: HomeAuthActionsProps) {
   const initials = ((user?.firstName?.[0] ?? "") + (user?.lastName?.[0] ?? "") || "A").toUpperCase();
 
   if (!isLoaded) {
-    return variant === "header" ? <div className="h-11 w-11" aria-hidden="true" /> : <div className="h-11 w-28" aria-hidden="true" />;
+    return variant === "header" ? <div className="h-11 w-11 shrink-0" aria-hidden="true" /> : <div className="h-11 w-28" aria-hidden="true" />;
   }
 
   if (isSignedIn && user) {
     if (variant === "header") {
       return (
-        <div className="relative">
+        <div className="relative shrink-0 self-center sm:self-auto">
           <button
             type="button"
             onClick={() => setMenuOpen((current) => !current)}
@@ -65,7 +65,7 @@ export function HomeAuthActions({ variant = "header" }: HomeAuthActionsProps) {
     }
 
     return (
-      <Button asChild size="lg" variant="outline" className="rounded-xl border-slate-300 bg-white/90">
+      <Button asChild size="lg" variant="outline" className="w-full rounded-xl border-slate-300 bg-white/90 sm:w-auto">
         <Link href="/account">Open profile</Link>
       </Button>
     );
@@ -73,14 +73,14 @@ export function HomeAuthActions({ variant = "header" }: HomeAuthActionsProps) {
 
   if (variant === "header") {
     return (
-      <Button asChild variant="outline" className="rounded-xl">
+      <Button asChild variant="outline" className="w-full rounded-xl sm:w-auto">
         <Link href="/sign-in">Sign in</Link>
       </Button>
     );
   }
 
   return (
-    <Button asChild size="lg" variant="outline" className="rounded-xl border-slate-300 bg-white/90">
+    <Button asChild size="lg" variant="outline" className="w-full rounded-xl border-slate-300 bg-white/90 sm:w-auto">
       <Link href="/sign-in">Clerk sign in</Link>
     </Button>
   );
