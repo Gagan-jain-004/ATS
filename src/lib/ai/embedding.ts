@@ -64,25 +64,30 @@ export async function generateEmbedding(text: string) {
     return cached;
   }
 
-  const ollamaBaseUrl = process.env.OLLAMA_BASE_URL ?? "http://localhost:11434";
-  const model = process.env.OLLAMA_EMBED_MODEL ?? "nomic-embed-text";
+  const isProduction = process.env.NODE_ENV === "production";
+  const hasOllamaUrl = !!process.env.OLLAMA_BASE_URL;
 
-  try {
-    const response = await fetch(`${ollamaBaseUrl}/api/embeddings`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ model, prompt: text })
-    });
+  if (!isProduction || hasOllamaUrl) {
+    const ollamaBaseUrl = process.env.OLLAMA_BASE_URL ?? "http://localhost:11434";
+    const model = process.env.OLLAMA_EMBED_MODEL ?? "nomic-embed-text";
 
-    if (response.ok) {
-      const payload = (await response.json()) as { embedding?: number[] };
-      if (payload.embedding?.length) {
-        embeddingCache.set(cacheKey, payload.embedding);
-        return payload.embedding;
+    try {
+      const response = await fetch(`${ollamaBaseUrl}/api/embeddings`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ model, prompt: text })
+      });
+
+      if (response.ok) {
+        const payload = (await response.json()) as { embedding?: number[] };
+        if (payload.embedding?.length) {
+          embeddingCache.set(cacheKey, payload.embedding);
+          return payload.embedding;
+        }
       }
+    } catch {
+      // fallback below
     }
-  } catch {
-    // fallback below
   }
 
   const expanded = await groqRewrite(text);

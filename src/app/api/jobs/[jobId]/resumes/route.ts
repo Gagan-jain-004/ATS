@@ -6,6 +6,8 @@ import { generateEmbedding } from "@/lib/ai/embedding";
 import { scoreResumeMatch } from "@/lib/ai/matching";
 import { hashContent } from "@/lib/hash";
 
+export const maxDuration = 60; // Allows Vercel Pro users to execute up to 60 seconds.
+
 export async function POST(request: NextRequest, { params }: { params: Promise<{ jobId: string }> }) {
   const resolvedParams = await params;
   const job = await getJobById(resolvedParams.jobId);
@@ -20,61 +22,74 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     return NextResponse.json({ error: "No resume files provided." }, { status: 400 });
   }
 
+  const results = await Promise.all(
+    files.map(async (file) => {
+      const buffer = Buffer.from(await file.arrayBuffer());
+      const resumeHash = hashContent(buffer.toString("base64"));
+      const parsedText = await extractResumeText(buffer, file.name);
+      const profile = parseResumeText(parsedText);
+      const duplicate = await findDuplicateCandidate(resolvedParams.jobId, {
+        email: profile.email,
+        phone: profile.phone,
+        resumeHash
+      });
+
+      if (duplicate) {
+        return { type: "skipped", file: file.name, reason: "Duplicate resume detected." };
+      }
+
+      const resumeEmbedding = await generateEmbedding(parsedText);
+      const jobEmbedding = Array.isArray(job.jobEmbedding) ? job.jobEmbedding : [];
+      const match = scoreResumeMatch({
+        jobTitle: job.title,
+        enhancedJd: job.enhancedJd,
+        jobSkills: job.skills,
+        jobEmbedding,
+        resumeText: parsedText,
+        resumeSkills: profile.skills,
+        resumeEmbedding,
+        experienceYears: profile.experienceYears
+      });
+
+      let resumeUrl = `/samples/${file.name}`;
+      try {
+        const uploaded = await uploadResumeToCloudinary(buffer, file.name);
+        resumeUrl = uploaded.url;
+      } catch {
+        // Keep the local preview URL when Cloudinary is not configured.
+      }
+
+      const candidate = await addCandidate(resolvedParams.jobId, {
+        id: `candidate-${resumeHash.slice(0, 12)}`,
+        fullName: profile.name,
+        email: profile.email,
+        phone: profile.phone,
+        role: match.predictedRole,
+        matchPercentage: match.matchPercentage,
+        skills: profile.skills,
+        experienceYears: profile.experienceYears,
+        status: "UNREAD",
+        uploadDate: new Date().toISOString(),
+        resumeUrl,
+        notes: "",
+        matchedSkills: match.matchedSkills,
+        missingSkills: match.missingSkills,
+        parsedText
+      });
+
+      return { type: "processed", file: file.name, candidate, match };
+    })
+  );
+
   const processed = [];
   const skipped = [];
 
-  for (const file of files) {
-    const buffer = Buffer.from(await file.arrayBuffer());
-    const resumeHash = hashContent(buffer.toString("base64"));
-    const parsedText = await extractResumeText(buffer, file.name);
-    const profile = parseResumeText(parsedText);
-    const duplicate = await findDuplicateCandidate(resolvedParams.jobId, { email: profile.email, phone: profile.phone, resumeHash });
-
-    if (duplicate) {
-      skipped.push({ file: file.name, reason: "Duplicate resume detected." });
-      continue;
+  for (const res of results) {
+    if (res.type === "skipped") {
+      skipped.push({ file: res.file, reason: res.reason });
+    } else {
+      processed.push({ file: res.file, candidate: res.candidate, match: res.match });
     }
-
-    const resumeEmbedding = await generateEmbedding(parsedText);
-    const jobEmbedding = Array.isArray(job.jobEmbedding) ? job.jobEmbedding : [];
-    const match = scoreResumeMatch({
-      jobTitle: job.title,
-      enhancedJd: job.enhancedJd,
-      jobSkills: job.skills,
-      jobEmbedding,
-      resumeText: parsedText,
-      resumeSkills: profile.skills,
-      resumeEmbedding,
-      experienceYears: profile.experienceYears
-    });
-
-    let resumeUrl = `/samples/${file.name}`;
-    try {
-      const uploaded = await uploadResumeToCloudinary(buffer, file.name);
-      resumeUrl = uploaded.url;
-    } catch {
-      // Keep the local preview URL when Cloudinary is not configured.
-    }
-
-    const candidate = await addCandidate(resolvedParams.jobId, {
-      id: `candidate-${resumeHash.slice(0, 12)}`,
-      fullName: profile.name,
-      email: profile.email,
-      phone: profile.phone,
-      role: match.predictedRole,
-      matchPercentage: match.matchPercentage,
-      skills: profile.skills,
-      experienceYears: profile.experienceYears,
-      status: "UNREAD",
-      uploadDate: new Date().toISOString(),
-      resumeUrl,
-      notes: "",
-      matchedSkills: match.matchedSkills,
-      missingSkills: match.missingSkills,
-      parsedText
-    });
-
-    processed.push({ file: file.name, candidate, match });
   }
 
   await updateJob(resolvedParams.jobId, {
